@@ -3,7 +3,7 @@ package ru.appline;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import ru.appline.logic.Model;
+import ru.appline.logic.Calculator;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 @WebServlet(urlPatterns = "/calc")
 public class ServletCalculator extends HttpServlet {
@@ -24,6 +26,7 @@ public class ServletCalculator extends HttpServlet {
     //        "b": 5,
     //        "math": "*"
     //    }
+
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter pw = resp.getWriter();
@@ -39,26 +42,12 @@ public class ServletCalculator extends HttpServlet {
         double a = jobj.get("a").getAsDouble();
         double b = jobj.get("b").getAsDouble();
         String math = jobj.get("math").getAsString();
-        double sum = 0;
 
-        switch(math) {
-            case ("+"):
-                sum = a + b;
-                break;
-            case ("-"):
-                sum = a - b;
-                break;
-            case ("*"):
-                sum = a * b;
-                break;
-            case ("/"):
-                sum = a / b;
-                break;
-            default:
-                sum = 0;
-                break;
-        }
-        pw.print(sum);
+//            {
+//                "result":  50
+//            }
+
+        pw.print(gson.toJson(new Calculator(a, b, math).getM()));
 
     }
 

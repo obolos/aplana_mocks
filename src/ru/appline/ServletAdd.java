@@ -6,8 +6,6 @@ import com.google.gson.JsonObject;
 import ru.appline.logic.Model;
 import ru.appline.logic.User;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
