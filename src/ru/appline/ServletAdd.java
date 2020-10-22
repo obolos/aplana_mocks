@@ -16,33 +16,34 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @WebServlet(urlPatterns = "/add")
 public class ServletAdd extends HttpServlet {
 
-    // private AtomicInteger counter = new AtomicInteger(5);
-
+    private AtomicInteger counter = new AtomicInteger(4);
 
     Model model = Model.getInstance();
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        int param = 0;
+        int id = 0;
         PrintWriter pw = resp.getWriter();
 
-        try{ param = Integer.parseInt(req.getParameter("search"));
+        try{ id = Integer.parseInt(req.getParameter("id"));
         } catch(Exception e) {e.printStackTrace();}
 
-        if (param == 0) {
+        if (id == 0) {
             resp.setContentType("application/json;charset=utf-8");
             pw = resp.getWriter();
             pw.print(gson.toJson(model.getFromList()));
         }
-        else if (param > 0 && param < model.getFromList().size()) {
+        else if (model.getFromList().containsKey(id)) {
             resp.setContentType("application/json;charset=utf-8");
-            pw.print(gson.toJson(model.getFromList().get(param)));
+            pw.print(gson.toJson(model.getFromList().get(id)));
         }
         else {
             pw.print("No such element");
@@ -69,7 +70,7 @@ public class ServletAdd extends HttpServlet {
         double salary = jobj.get("salary").getAsDouble();
 
         User user = new User(name, surname, salary);
-        model.add(user, model.getFromList().size()+1);
+        model.add(user, counter.getAndIncrement());
 
         resp.setContentType("application/json;charset=utf-8");
         PrintWriter pw = resp.getWriter();
@@ -81,14 +82,51 @@ public class ServletAdd extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        int id = 0;
+        PrintWriter pw = resp.getWriter();
 
+        try{ id = Integer.parseInt(req.getParameter("id"));
+        } catch(Exception e) {e.getMessage();}
+
+        if (Model.getInstance().getFromList().get(id) != null) {
+            resp.setContentType("application/json;charset=utf-8");
+            pw.print(gson.toJson(Model.getInstance().getFromList().get(id) + " was removed"));
+
+            Iterator<Map.Entry<Integer, User>> iterator = Model.getInstance().getFromList().entrySet().iterator();
+            while(iterator.hasNext()) {
+                if(iterator.next().getKey() == id)
+                    iterator.remove();
+            }
+
+        } else {pw.print("no such element!");}
     }
 
-    // Реализовать сервлет с методом doPut(), который будет обновлять (изменять) записи о пользователях (необходимо передавать id, имя, фамилию и заплату пользователей).
+    // Реализовать сервлет с методом doPut(), который будет обновлять (изменять) записи о пользователях
+    // (необходимо передавать id, имя, фамилию и заплату пользователей).
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        int id = 0;
+        PrintWriter pw = resp.getWriter();
+        StringBuilder sb = new StringBuilder();
+        BufferedReader reader = req.getReader();
+        String str;
+        req.setCharacterEncoding("UTF-8");
 
+        try{ id = Integer.parseInt(req.getParameter("id"));
+        } catch(Exception e) {e.getMessage();}
+
+        if (model.getFromList().containsKey(id)) {
+            while ((str = reader.readLine()) != null) sb.append(str);
+
+            JsonObject jobj = gson.fromJson(sb.toString(), JsonObject.class);
+            model.getFromList().get(id).setName(jobj.get("name").getAsString());
+            model.getFromList().get(id).setSurname(jobj.get("surname").getAsString());
+            model.getFromList().get(id).setSalary(jobj.get("salary").getAsDouble());
+
+            pw.print(gson.toJson(model.getFromList().get(id)) + "successfully changed");
+
+        } else pw.print("no such element");
     }
 
 
